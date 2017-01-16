@@ -12,6 +12,7 @@ app.service('TokenService', [function() {
 
     this.getToken = function() {
         return this.token;
+        
     }
 }]);
 
