@@ -8,12 +8,18 @@ app.constant('api', {
 app.service('TokenService', [function() {
     this.token = '';
     this.setToken = function(t) {
-        this.token = t;
+        if (localStorage.getItem('token') === null) {
+            localStorage.setItem('token', t);
+        } else {
+            this.token = localStorage.getItem('token');
+        }
     }
-
     this.getToken = function() {
-        return this.token;
-
+        return localStorage.getItem('token');
+    }
+    this.deleteToken = function() {
+        if (localStorage.getItem('token') !== null)
+            localStorage.removeItem('token');
     }
 }]);
 
@@ -24,7 +30,7 @@ app.config(['$httpProvider', 'api', function($httpProvider, api) {
         return {
             request: function(config) {
                 var token = TokenService.getToken();
-                if (token != "") {
+                if (token !== null) {
                     config.url += ((config.url.indexOf('?') >= 0) ? '&' : '?') +
                         'token=' + token;
                 }
@@ -44,22 +50,35 @@ app.factory("Member", ['$resource', 'api', function($resource, api) {
         signin: {
             method: 'POST',
             url: api.url + '/members/signin'
+        },
+        signout: {
+            method: 'DELETE',
+            url: api.url + '/members/signout'
         }
     });
 }]);
 
 app.controller("StartController", ['$scope', 'Member', 'TokenService', function($scope, Member, TokenService) {
-
-    Member.signin({
-        email: "titi@toto.fr",
-        password: 'titi'
-    }, function(m) {
-        $scope.member = m;
-        TokenService.setToken($scope.member.token);
+    if (TokenService.getToken() === null) {
+        Member.signin({
+            email: "titi@toto.fr",
+            password: 'titi'
+        }, function(m) {
+            $scope.member = m;
+            TokenService.setToken($scope.member.token);
+            $scope.members = Member.query(function(members) {
+                console.log($scope.members);
+            });
+        });
+    } else {
+        TokenService.setToken(localStorage.getItem('token'));
         $scope.members = Member.query(function(members) {
             console.log($scope.members);
         });
-    });
+        Member.signout({}, function() {
+            TokenService.deleteToken();
+        })
+    }
 }]);
 
 // $scope.newMember = new Member({
