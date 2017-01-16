@@ -1,5 +1,5 @@
-var url_local = 'localhost:8888/CoopProject_cisiie/';
-var app = angular.module("coop", ['ngResource']);
+var app = angular.module("coop", ['ngResource', 'ngRoute']);
+var url_local = 'http://127.0.0.1/CISIIE/Javascript/CoopProject_cisiie/';
 app.constant('api', {
     'key': '8f9d446fa032445083d15cd71e978aa4',
     'url': 'http://coop.api.netlor.fr/api'
@@ -58,7 +58,7 @@ app.factory("Member", ['$resource', 'api', function($resource, api) {
     });
 }]);
 
-app.controller("StartController", ['$scope', 'Member', 'TokenService', function($scope, Member, TokenService) {
+app.controller("StartController", ['$scope', 'Member', 'TokenService', '$location', function($scope, Member, TokenService, $location) {
     if (TokenService.getToken() === null) {
         Member.signin({
             email: "titi@toto.fr",
@@ -66,30 +66,21 @@ app.controller("StartController", ['$scope', 'Member', 'TokenService', function(
         }, function(m) {
             $scope.member = m;
             TokenService.setToken($scope.member.token);
-            $scope.members = Member.query(function(members) {
-                console.log($scope.members);
-            });
+            console.log($location.path());
+            $location.path('/signin');
         });
     } else {
         TokenService.setToken(localStorage.getItem('token'));
-        $scope.members = Member.query(function(members) {
-            console.log($scope.members);
-        });
-        Member.signout({}, function() {
-            TokenService.deleteToken();
-        })
+        // $scope.members = Member.query(function(members) {
+        //     console.log($scope.members);
+        // });
+        // Member.signout({}, function() {
+        //     TokenService.deleteToken();
+        // })
+        $location.path('/')
     }
 }]);
 
-app.controller("SigninController", ['$scope', function($scope) {
-
-}]);
-
-app.service("Signin",['$http','$scope',function($http,$scope){
-    $http.get(url_local + '/views/sign_in.html').then(function(response){
-        $scope.toto = response.data;
-    });
-}]);
 
 // $scope.newMember = new Member({
 // 	fullname: "TOTO",
