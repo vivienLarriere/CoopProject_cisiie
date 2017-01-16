@@ -1,3 +1,4 @@
+var url_local = 'http://127.0.0.1/CISIIE/Javascript/api_netlor_project/';
 var app = angular.module("coop", ['ngResource']);
 app.constant('api', {
     'key': '8f9d446fa032445083d15cd71e978aa4',
@@ -12,7 +13,7 @@ app.service('TokenService', [function() {
 
     this.getToken = function() {
         return this.token;
-        
+
     }
 }]);
 
