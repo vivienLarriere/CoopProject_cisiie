@@ -1,4 +1,4 @@
-var url_local = 'http://127.0.0.1/CISIIE/Javascript/api_netlor_project/';
+var url_local = 'localhost:8888/CoopProject_cisiie/';
 var app = angular.module("coop", ['ngResource']);
 app.constant('api', {
     'key': '8f9d446fa032445083d15cd71e978aa4',
@@ -13,7 +13,6 @@ app.service('TokenService', [function() {
 
     this.getToken = function() {
         return this.token;
-
     }
 }]);
 
@@ -59,6 +58,16 @@ app.controller("StartController", ['$scope', 'Member', 'TokenService', function(
         $scope.members = Member.query(function(members) {
             console.log($scope.members);
         });
+    });
+}]);
+
+app.controller("SigninController", ['$scope', function($scope) {
+
+}]);
+
+app.service("Signin",['$http','$scope',function($http,$scope){
+    $http.get(url_local + '/views/sign_in.html').then(function(response){
+        $scope.toto = response.data;
     });
 }]);
 
