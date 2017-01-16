@@ -5,6 +5,23 @@ app.constant('api', {
     'url': 'http://coop.api.netlor.fr/api'
 });
 
+app.service('TokenService', [function() {
+    this.token = null;
+    this.setToken = function(t) {
+        if (localStorage.getItem('token') === undefined)
+            localStorage.setItem('token', t);
+        else
+            this.token = localStorage.getItem('token');
+
+    };
+    this.getToken = function() {
+        if (localStorage.getItem('token') === undefined)
+            return localStorage.getItem('token');
+        else
+            return null;
+    };
+}]);
+
 app.config(['$httpProvider', 'api', function($httpProvider, api) {
     $httpProvider.defaults.headers.common.Authorization = 'Token token=' + api.key;
 
@@ -33,23 +50,6 @@ app.factory("Member", ['$resource', 'api', function($resource, api) {
             url: api.url + '/members/signin'
         }
     });
-}]);
-
-app.service('TokenService', [function() {
-    this.token = null;
-    this.setToken = function(t) {
-        if (localStorage.getItem('token') === undefined)
-            localStorage.setItem('token', t);
-        else
-            this.token = localStorage.getItem('token');
-
-    };
-    this.getToken = function() {
-        if (localStorage.getItem('token') === undefined)
-            return localStorage.getItem('token');
-        else
-            return null;
-    };
 }]);
 
 app.controller("StartController", ['$scope', 'Member', 'TokenService', function($scope, Member, TokenService) {
