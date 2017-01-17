@@ -7,7 +7,16 @@ app.config(['$routeProvider', function($routeProvider) {
         })
 
         .when('/signin', {
-            templateUrl: './views/sign_in.html'
+            templateUrl: './views/sign_in.html',
+            controller: 'LoginController'
+        })
+
+        .when('/signout', {
+            controller: 'LogoutController'
+        })
+
+        .when('/home', {
+          templateUrl: './views/home.html'
         })
 
         .otherwise({

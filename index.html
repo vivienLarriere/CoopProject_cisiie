@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="coop">
+<html>
 
 <head>
     <meta charset="UTF-8" />
@@ -7,16 +7,15 @@
     <script type="text/javascript" src="./lib/angular/angular.min.js"></script>
     <script type="text/javascript" src="./lib/angular/angular-resource.min.js"></script>
     <script type="text/javascript" src="./lib/angular/angular-route.min.js"></script>
-    <script type="text/javascript" src="./resources/app.js"></script>
-    <script type="text/javascript" src="./resources/routes.js"></script>
+    <script type="text/javascript" src="./resources/js/app.js"></script>
+    <script type="text/javascript" src="./resources/js/routes.js"></script>
     <script type="text/javascript" src="./lib/semantic/semantic.min.js"></script>
     <link href="./lib/semantic/semantic.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="./resources/css/custom.css" />
 </head>
 
-<body>
-    <div ng-controller="StartController">
-        <div ng-view></div>
-    </div>
+<body ng-app="coop">
+    <div ng-view></div>
 </body>
 
 </html>
