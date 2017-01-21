@@ -1,0 +1,47 @@
+<div class="ui middle aligned center aligned grid" ng-controller="SignupController">
+    <div class="ui segment column">
+        <h1 class="ui teal header">
+      <div class="content">
+            Inscrivez-vous!
+      </div>
+    </h1>
+        <form class="ui large form" name="signupForm" ng-submit="signup()" ng-class="class">
+            <div class="ui stacked segment">
+                <div class="field">
+                    <div class="ui pointing below label left floated segment">
+                        <i class="user icon"></i>Votre nom d'utilisateur
+                    </div>
+
+                    <div class="ui input">
+                        <input ng-model="username" type="text" name="signupUsername" placeholder="Nom d'utilisateur">
+                    </div>
+                </div>
+                <br>
+                <div class="field">
+                    <div class="ui pointing below label left floated segment">
+                        <i class="mail icon"></i> Votre adresse e-mail
+                    </div>
+                    <div class="ui input">
+                        <input ng-model="email" type="email" name="signupEmail" placeholder="example@example.com">
+                    </div>
+                </div>
+                <br>
+                <div class="field">
+                    <div class="ui pointing below label left floated segment">
+                        <i class="lock icon"></i> Votre mot de passe
+                    </div>
+                    <div class="ui input">
+                        <input ng-model="password" type="password" name="signupPassword" placeholder="******">
+                    </div>
+                </div>
+                <input class="ui fluid large teal submit button" type="submit" value="M'inscrire">
+            </div>
+            <div class="ui error message"></div>
+
+        </form>
+
+        <div class="ui message">
+            Déjà inscrit ?<br> <a href="#!/signin">Connectez-vous !</a>
+        </div>
+    </div>
+</div>
