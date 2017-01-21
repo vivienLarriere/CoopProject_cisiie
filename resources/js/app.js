@@ -24,6 +24,10 @@ app.service('TokenService', [function() {
     }
 }]);
 
+app.service('UrlService', ['$location', function($location) {
+    this.myurl = $location.host();
+}]);
+
 app.config(['$httpProvider', 'api', function($httpProvider, api) {
     $httpProvider.defaults.headers.common.Authorization = 'Token token=' + api.key;
 
@@ -70,7 +74,7 @@ app.controller("StartController", ['$scope', 'Member', 'TokenService', '$locatio
 app.controller("LoginController", ['$scope', '$http', 'TokenService', 'Member', '$location', '$timeout', function($scope, $http, TokenService, Member, $location, $timeout) {
     if (TokenService.getToken() === null) {
         $scope.login = function() {
-            $scope.class += " loading form"
+            $scope.class += " loading form";
             Member.signin({
                     email: $scope.email, //titi@toto.fr
                     password: $scope.password //titi
@@ -96,25 +100,32 @@ app.controller("LogoutController", ['$scope', 'TokenService', 'Member', '$locati
             Member.signout({}, function() {
                 TokenService.deleteToken();
                 $location.path('/signin');
-                console.log('toto');
             });
         }
     }
 }]);
 
+app.controller("SignupController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
+    if (TokenService.getToken !== null) {
+        $scope.signup = function() {
+            $scope.class += " loading form";
+            $scope.newMember = new Member({
+                fullname: $scope.username,
+                email: $scope.email,
+                password: $scope.password
+            });
+            $scope.newMember.$save(function(m) {
+                console.log($scope.newMember);
+                $location.path('/signin');
+            }, function(e) {
+                alert(e.data.error);
+                $scope.class = "ui large form"
+            });
 
+        }
+    }
+}]);
 
-// $scope.newMember = new Member({
-// 	fullname: "TOTO",
-// 	email: "toto2@coop.fr",
-// 	password: "toto"
-// });
-
-// $scope.newMember.$save(function(m){
-// 	console.log($scope.newMember);
-// }, function(e){
-
-// });
 
 /*$scope.member =	Member.save({
 		fullname: "TOTO",
