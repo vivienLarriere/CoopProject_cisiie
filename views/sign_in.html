@@ -5,7 +5,7 @@
         Connectez-vous à l'application
       </div>
     </h2>
-        <form class="ui large form" name="loginForm" ng-submit="login()">
+        <form class="ui large form" name="loginForm" ng-submit="login()" ng-class="class">
             <div class="ui stacked segment">
                 <div class="field">
                     <div class="ui left icon input">
@@ -16,7 +16,7 @@
                 <div class="field">
                     <div class="ui left icon input">
                         <i class="lock icon"></i>
-                        <input ng-model="password" type="password" name="loginPassword" placeholder="Mot de passe" ng-minlength="6">
+                        <input ng-model="password" type="password" name="loginPassword" placeholder="Mot de passe">
                     </div>
                 </div>
                 <input ng- class="ui fluid large teal submit button" type="submit" value="Se connecter">

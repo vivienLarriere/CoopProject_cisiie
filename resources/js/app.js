@@ -67,18 +67,22 @@ app.controller("StartController", ['$scope', 'Member', 'TokenService', '$locatio
     }
 }]);
 
-app.controller("LoginController", ['$scope', '$http', 'TokenService', 'Member', '$location', function($scope, $http, TokenService, Member, $location) {
+app.controller("LoginController", ['$scope', '$http', 'TokenService', 'Member', '$location', '$timeout', function($scope, $http, TokenService, Member, $location, $timeout) {
     if (TokenService.getToken() === null) {
         $scope.login = function() {
+            $scope.class += " loading form"
             Member.signin({
-                email: "titi@toto.fr",
-                password: 'titi'
-            }, function(m) {
-                $scope.member = m;
-                TokenService.setToken($scope.member.token);
-                console.log($location.path());
-                $location.path('/home');
-            });
+                    email: $scope.email, //titi@toto.fr
+                    password: $scope.password //titi
+                }, function(m) {
+                    $scope.member = m;
+                    TokenService.setToken($scope.member.token);
+                    $location.path('/home');
+                },
+                function(error) {
+                    alert(error.data.error);
+                    $scope.class = 'ui large form';
+                });
         }
     } else
         $location.path('/home');
@@ -86,12 +90,16 @@ app.controller("LoginController", ['$scope', '$http', 'TokenService', 'Member', 
 }]);
 
 
-app.controller("LogoutController", ['TokenService', 'Member', '$location', function(TokenService, Member, $location) {
-    Member.signout({}, function() {
-        TokenService.deleteToken();
-    });
-    console.log('toto');
-    $location.path('/signin');
+app.controller("LogoutController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
+    if (TokenService.getToken !== null) {
+        $scope.logout = function() {
+            Member.signout({}, function() {
+                TokenService.deleteToken();
+                $location.path('/signin');
+                console.log('toto');
+            });
+        }
+    }
 }]);
 
 
