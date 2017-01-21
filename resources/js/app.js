@@ -95,7 +95,7 @@ app.controller("LoginController", ['$scope', '$http', 'TokenService', 'Member', 
 
 
 app.controller("LogoutController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
-    if (TokenService.getToken !== null) {
+    if (TokenService.getToken() !== null) {
         $scope.logout = function() {
             Member.signout({}, function() {
                 TokenService.deleteToken();
@@ -106,7 +106,7 @@ app.controller("LogoutController", ['$scope', 'TokenService', 'Member', '$locati
 }]);
 
 app.controller("SignupController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
-    if (TokenService.getToken !== null) {
+    if (TokenService.getToken() === null) {
         $scope.signup = function() {
             $scope.class += " loading form";
             $scope.newMember = new Member({
@@ -123,7 +123,25 @@ app.controller("SignupController", ['$scope', 'TokenService', 'Member', '$locati
             });
 
         }
-    }
+    } else
+        $location.path('/home');
+
+}]);
+
+app.controller("HomeController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
+    if (TokenService.getToken() !== null) {
+        $scope.members = Member.query(
+            function(m) {
+                $scope.members = m;
+                console.log($scope.members);
+            },
+            function(error) {
+                console.log(error);
+            });
+    } else
+        $location.path('/signin')
+
+
 }]);
 
 
@@ -139,11 +157,5 @@ app.controller("SignupController", ['$scope', 'TokenService', 'Member', '$locati
 		console.log($scope.newMember);
 	});
 
-	$scope.members = Member.query(
-		function(m){
-			console.log(m);
-		},
-		function(error){
-			console.log(error);
-		}
+
 	);*/
