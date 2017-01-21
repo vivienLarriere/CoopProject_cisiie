@@ -1,20 +1,20 @@
 body {
-     margin           : 2%;
-     background-color : #DADADA;
+    margin: 2%;
+    background-color: #DADADA;
 }
 
 body>.grid {
-     height           : 100%;
-     margin           : 2%;
-     padding          : 3%;
-     border           : 1px solid grey;
-     background-color : white;
+    height: 100%;
+    margin: 2%;
+    padding: 3%;
+    border: 1px solid grey;
+    background-color: white;
 }
 
 .image {
-     margin-top : -100px;
+    margin-top: -100px;
 }
 
 .column {
-     width : 70%;
+    width: 70%;
 }
