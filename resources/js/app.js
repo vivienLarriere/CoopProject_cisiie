@@ -1,5 +1,4 @@
 var app = angular.module("coop", ['ngResource', 'ngRoute']);
-var url_local = 'http://127.0.0.1/CISIIE/Javascript/CoopProject_cisiie/';
 app.constant('api', {
     'key': '8f9d446fa032445083d15cd71e978aa4',
     'url': 'http://coop.api.netlor.fr/api'
@@ -14,9 +13,11 @@ app.service('TokenService', [function() {
             this.token = localStorage.getItem('token');
         }
     }
+
     this.getToken = function() {
         return localStorage.getItem('token');
     }
+
     this.deleteToken = function() {
         if (localStorage.getItem('token') !== null)
             localStorage.removeItem('token');
@@ -60,26 +61,47 @@ app.factory("Member", ['$resource', 'api', function($resource, api) {
 
 app.controller("StartController", ['$scope', 'Member', 'TokenService', '$location', function($scope, Member, TokenService, $location) {
     if (TokenService.getToken() === null) {
-        Member.signin({
-            email: "titi@toto.fr",
-            password: 'titi'
-        }, function(m) {
-            $scope.member = m;
-            TokenService.setToken($scope.member.token);
-            console.log($location.path());
-            $location.path('/signin');
-        });
+        $location.path('/signin');
     } else {
-        TokenService.setToken(localStorage.getItem('token'));
-        // $scope.members = Member.query(function(members) {
-        //     console.log($scope.members);
-        // });
-        // Member.signout({}, function() {
-        //     TokenService.deleteToken();
-        // })
-        $location.path('/')
+        $location.path('/home');
     }
 }]);
+
+app.controller("LoginController", ['$scope', '$http', 'TokenService', 'Member', '$location', '$timeout', function($scope, $http, TokenService, Member, $location, $timeout) {
+    if (TokenService.getToken() === null) {
+        $scope.login = function() {
+            $scope.class += " loading form"
+            Member.signin({
+                    email: $scope.email, //titi@toto.fr
+                    password: $scope.password //titi
+                }, function(m) {
+                    $scope.member = m;
+                    TokenService.setToken($scope.member.token);
+                    $location.path('/home');
+                },
+                function(error) {
+                    alert(error.data.error);
+                    $scope.class = 'ui large form';
+                });
+        }
+    } else
+        $location.path('/home');
+
+}]);
+
+
+app.controller("LogoutController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
+    if (TokenService.getToken !== null) {
+        $scope.logout = function() {
+            Member.signout({}, function() {
+                TokenService.deleteToken();
+                $location.path('/signin');
+                console.log('toto');
+            });
+        }
+    }
+}]);
+
 
 
 // $scope.newMember = new Member({
