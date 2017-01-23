@@ -105,6 +105,10 @@ app.controller("LogoutController", ['$scope', 'TokenService', 'Member', '$locati
     }
 }]);
 
+app.controller("NewChanController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
+    
+}])
+
 app.controller("SignupController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
     if (TokenService.getToken() === null) {
         $scope.signup = function() {
