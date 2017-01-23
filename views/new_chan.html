@@ -1,3 +1,29 @@
-<div class="ui message">
-    Nouveau chan<br>
+<div class="ui middle aligned center aligned grid" ng-controller="NewChanController">
+    <div class="ui segment column">
+        <h1 class="ui teal header">
+            <div class="content">
+                Création d'un nouveau channel
+            </div>
+        </h1>
+        <form class="ui large form" name="newChanForm" ng-submit="addChan()" ng-class="class">
+            <div class="ui stacked segment">
+                <div class="field">
+                    <div class="ui pointing below label left floated segment">
+                        <i class="user icon"></i>Nom du channel
+                    </div>
+
+                    <div class="ui input">
+                        <input ng-model="chanName" type="text" name="chanName" placeholder="Nom du channel">
+                    </div>
+                </div>
+                <input class="ui fluid large teal submit button" type="submit" value="Créer">
+            </div>
+            <div class="ui error message"></div>
+
+        </form>
+
+        <div class="ui message">
+            <a href="#!/home">Annuler</a>
+        </div>
+    </div>
 </div>
