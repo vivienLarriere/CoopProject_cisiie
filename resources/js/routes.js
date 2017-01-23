@@ -25,6 +25,11 @@ app.config(['$routeProvider', function($routeProvider) {
             controller: 'HomeController'
         })
 
+        .when('/chan/new',{
+            templateUrl:'./views/new_chan.html',
+            controller: 'NewChanController'
+        })
+
         .otherwise({
             redirectTo: '/'
         });
