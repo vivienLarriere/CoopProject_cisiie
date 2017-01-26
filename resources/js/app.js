@@ -24,8 +24,9 @@ app.service('TokenService', [function() {
     }
 }]);
 
+
 app.service('UrlService', ['$location', function($location) {
-    this.myurl = $location.host();
+    this.myurl = $location.absURL();
 }]);
 
 app.config(['$httpProvider', 'api', function($httpProvider, api) {
@@ -60,6 +61,14 @@ app.factory("Member", ['$resource', 'api', function($resource, api) {
             method: 'DELETE',
             url: api.url + '/members/signout'
         }
+    });
+}]);
+
+app.factory("Channel", ['$resource', 'api', function($resource, api) {
+    return $resource(api.url + '/channels/:id', {
+        id: '@_id'
+    }, {
+
     });
 }]);
 
@@ -105,12 +114,6 @@ app.controller("LogoutController", ['$scope', 'TokenService', 'Member', '$locati
     }
 }]);
 
-app.controller("NewChanController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
-    if (TokenService.getToken() !== null){
-        $location.path('/chan/new');
-    }
-}])
-
 app.controller("SignupController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
     if (TokenService.getToken() === null) {
         $scope.signup = function() {
@@ -121,7 +124,6 @@ app.controller("SignupController", ['$scope', 'TokenService', 'Member', '$locati
                 password: $scope.password
             });
             $scope.newMember.$save(function(m) {
-                console.log($scope.newMember);
                 $location.path('/signin');
             }, function(e) {
                 alert(e.data.error);
@@ -134,21 +136,64 @@ app.controller("SignupController", ['$scope', 'TokenService', 'Member', '$locati
 
 }]);
 
-app.controller("HomeController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
+app.controller("DisplayMembersController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
     if (TokenService.getToken() !== null) {
         $scope.members = Member.query(
             function(m) {
                 $scope.members = m;
-                console.log($scope.members);
             },
             function(error) {
                 console.log(error);
             });
+
+        $scope.deleteMember = function(m) {
+            m.$delete(
+                function() {
+                    console.log($scope.members);
+                },
+                function(error) {
+                    console.log(error);
+                });
+        }
     } else
         $location.path('/signin')
-
-
 }]);
+
+app.controller("ChanController", ['$scope', 'TokenService', 'Member', '$location', 'Channel', function($scope, TokenService, Member, $location, Channel) {
+    if (TokenService.getToken() !== null) {
+        $scope.channels = Channel.query(
+            function(c) {
+                $scope.channels = c;
+                console.log(c);
+            },
+            function(e) {
+                console.log(e);
+            });
+    } else
+        $location.path('/signin')
+}]);
+
+
+app.controller("NewChanController", ['$scope', 'TokenService', 'Member', '$location', 'Channel', function($scope, TokenService, Member, $location, Channel) {
+    if (TokenService.getToken() !== null) {
+        $scope.addChan = function() {
+            $scope.class += " loading form";
+
+            $scope.newChannel = new Channel({
+                label: $scope.chanName,
+                topic: $scope.chanTopic
+            });
+
+            $scope.newChannel.$save(function(c) {
+                $location.path('/chan');
+            }, function(e) {
+                $scope.class = "ui large form"
+                alert(e.data.error);
+            })
+        }
+    }
+}]);
+
 
 
 /*$scope.member =	Member.save({

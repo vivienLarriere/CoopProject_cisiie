@@ -1,0 +1,28 @@
+<div ng-include="'./views/navbar.html'"></div>
+<div class="ui grid">
+    <div class="ui five wide column" ng-repeat="channel in channels track by channel._id">
+        <div class="ui card">
+            <div class="content">
+                <div class="header">{{channel.label}}</div>
+                <div class="meta"> <i class="calendar outline icon"></i>
+                    <b> Créé le </b> {{ channel.created_at | date : 'dd/MM/yyyy'}}
+                    <b>à</b> {{channel.created_at | date : 'hh:mm'}}</div>
+                <div class="description">
+                    <b>Topic : </b> {{channel.topic}}
+                </div>
+            </div>
+            <div class="extra content">
+                <div class="ui mini buttons">
+                    <button class="ui button positive"><i class="comment icon"></i>Rejoindre</button>
+                    <div class="or"></div>
+                    <button class="ui button red"><i class="ban icon"></i>Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<div class="add-channel" ng-controller="ChanController">
+    <a href="#!/chan/new" class="left floated positive ui button">
+        <i class="add circle icon"></i>Créer un nouveau channel</a>
+</div>

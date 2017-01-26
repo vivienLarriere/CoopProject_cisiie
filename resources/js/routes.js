@@ -20,14 +20,23 @@ app.config(['$routeProvider', function($routeProvider) {
             controller: 'LogoutController'
         })
 
-        .when('/home', {
-            templateUrl: './views/home.html',
-            controller: 'HomeController'
+        .when('/members', {
+            templateUrl: './views/members.html',
+            controller: 'DisplayMembersController'
+        })
+
+        .when('/chan',{
+        templateUrl:'./views/chan.html',
+        controller: 'ChanController'
         })
 
         .when('/chan/new',{
             templateUrl:'./views/new_chan.html',
             controller: 'NewChanController'
+        })
+
+        .when('/home', {
+          templateUrl:'./views/home.html',
         })
 
         .otherwise({
