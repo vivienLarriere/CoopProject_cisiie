@@ -1,0 +1,24 @@
+<div class="ui secondary pointing menu">
+    <a class="item">
+      <a href="#!/home" class="item">
+        <i class="home icon"></i>
+        Accueil
+    </a>
+    <a class="item">
+      <a href="#!/chan" class="item">
+      <i class="comments icon"></i>
+    Mes channels
+  </a>
+    <a href="#!/members" class="item">
+      <i class="users icon"></i>
+    Mon équipe
+  </a>
+    <div class="right menu">
+        <div ng-controller="LogoutController">
+            <form name="logoutForm" ng-submit="logout()">
+                <button class="ui button red">Se déconnecter</button>
+            </form>
+        </div>
+    </div>
+</div>
+<hr>

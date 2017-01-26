@@ -1,3 +1,4 @@
+<div ng-include="'./views/navbar.html'"></div>
 <div class="ui middle aligned center aligned grid" ng-controller="NewChanController">
     <div class="ui segment column">
         <h1 class="ui teal header">
@@ -16,6 +17,16 @@
                         <input ng-model="chanName" type="text" name="chanName" placeholder="Nom du channel">
                     </div>
                 </div>
+
+                <div class="field">
+                    <div class="ui pointing below label left floated segment">
+                        <i class="user icon"></i>Topic du channel
+                    </div>
+
+                    <div class="ui input">
+                        <input ng-model="chanTopic" type="text" name="chantopic" placeholder="Topic du channel">
+                    </div>
+                </div>
                 <input class="ui fluid large teal submit button" type="submit" value="Créer">
             </div>
             <div class="ui error message"></div>
@@ -23,7 +34,7 @@
         </form>
 
         <div class="ui message">
-            <a href="#!/home">Annuler</a>
+            <a href="#!/chan">Annuler</a>
         </div>
     </div>
 </div>

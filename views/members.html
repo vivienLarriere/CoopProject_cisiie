@@ -1,0 +1,24 @@
+<div ng-include="'./views/navbar.html'"></div>
+<div class="ui segment">
+    <h2>Mon équipe</h2>
+    <div class="ui grid">
+        <div class="ui six wide column" ng-repeat="member in members track by member._id">
+            <div class="item">
+                <div class="content">
+                    <i class="users icon"></i> {{member.fullname}}
+                </div>
+            </div>
+            <div class="item">
+                <div class="content">
+                    <i class="mail icon"></i>
+                    <a href="mailto:{{member.email}}">{{member.email}}</a>
+                </div>
+            </div>
+            <div class="item">
+                <div class="content">
+                    <button ng-click='deleteMember(member)' class="circular ui icon button red mini"><i class="remove user icon"></i>&nbsp;&nbsp;&nbsp;Supprimer ce membre</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
