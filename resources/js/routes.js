@@ -7,8 +7,8 @@ app.config(['$routeProvider', function($routeProvider) {
         })
 
         .when('/signup', {
-          templateUrl: './views/sign_up.html',
-          controller: 'SignupController'
+            templateUrl: './views/sign_up.html',
+            controller: 'SignupController'
         })
 
         .when('/signin', {
@@ -25,18 +25,23 @@ app.config(['$routeProvider', function($routeProvider) {
             controller: 'DisplayMembersController'
         })
 
-        .when('/chan',{
-        templateUrl:'./views/chan.html',
-        controller: 'ChanController'
+        .when('/chan', {
+            templateUrl: './views/chan.html',
+            controller: 'ChanController'
         })
 
-        .when('/chan/new',{
-            templateUrl:'./views/new_chan.html',
+        .when('/chan/:id', {
+            templateUrl: './views/chan_detail.html',
+            controller: 'DisplayChanController'
+        })
+
+        .when('/chan/new', {
+            templateUrl: './views/new_chan.html',
             controller: 'NewChanController'
         })
 
         .when('/home', {
-          templateUrl:'./views/home.html',
+            templateUrl: './views/home.html',
         })
 
         .otherwise({

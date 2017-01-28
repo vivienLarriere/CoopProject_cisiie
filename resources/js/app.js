@@ -67,9 +67,7 @@ app.factory("Member", ['$resource', 'api', function($resource, api) {
 app.factory("Channel", ['$resource', 'api', function($resource, api) {
     return $resource(api.url + '/channels/:id', {
         id: '@_id'
-    }, {
-
-    });
+    }, {});
 }]);
 
 app.controller("StartController", ['$scope', 'Member', 'TokenService', '$location', function($scope, Member, TokenService, $location) {
@@ -138,9 +136,15 @@ app.controller("SignupController", ['$scope', 'TokenService', 'Member', '$locati
 
 app.controller("DisplayMembersController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
     if (TokenService.getToken() !== null) {
-        $scope.members = Member.query(
+        var members = Member.query(
             function(m) {
-                $scope.members = m;
+                var tmp_scope = [];
+                angular.forEach(m, function(value) {
+                    if (value.token !== TokenService.getToken())
+                        tmp_scope.push(value);
+                    console.log(tmp_scope);
+                });
+                $scope.members = tmp_scope;
             },
             function(error) {
                 console.log(error);
@@ -148,12 +152,14 @@ app.controller("DisplayMembersController", ['$scope', 'TokenService', 'Member', 
 
         $scope.deleteMember = function(m) {
             m.$delete(
-                function() {
-                    console.log($scope.members);
-                },
+                function() {},
                 function(error) {
                     console.log(error);
                 });
+            angular.forEach($scope.members, function(value, key) {
+                if (value === m)
+                    $scope.members.splice(key, 1);
+            });
         }
     } else
         $location.path('/signin')
@@ -191,6 +197,21 @@ app.controller("NewChanController", ['$scope', 'TokenService', 'Member', '$locat
                 alert(e.data.error);
             })
         }
+    } else {
+        $location.path('/');
+    }
+}]);
+
+app.controller('DisplayChanController', ['api', '$scope', 'TokenService', 'Member', 'Channel', '$routeParams', '$resource', function(api, $scope, TokenService, Member, Channel, $routeParams, $resource) {
+    if (TokenService.getToken() !== null) {
+        Channel.get({
+            id: $routeParams.id
+        }).$promise.then(function(c) {
+            $scope.channel = c;
+        });
+
+    } else {
+        $location.path('/');
     }
 }]);
 
