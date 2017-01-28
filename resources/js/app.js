@@ -67,9 +67,7 @@ app.factory("Member", ['$resource', 'api', function($resource, api) {
 app.factory("Channel", ['$resource', 'api', function($resource, api) {
     return $resource(api.url + '/channels/:id', {
         id: '@_id'
-    }, {
-
-    });
+    }, {});
 }]);
 
 app.controller("StartController", ['$scope', 'Member', 'TokenService', '$location', function($scope, Member, TokenService, $location) {
@@ -206,15 +204,12 @@ app.controller("NewChanController", ['$scope', 'TokenService', 'Member', '$locat
 
 app.controller('DisplayChanController', ['api', '$scope', 'TokenService', 'Member', 'Channel', '$routeParams', '$resource', function(api, $scope, TokenService, Member, Channel, $routeParams, $resource) {
     if (TokenService.getToken() !== null) {
-        var Channel = $resource(api.url + '/channels/:id', {
-            id: '@id'
-        });
         Channel.get({
             id: $routeParams.id
         }).$promise.then(function(c) {
             $scope.channel = c;
         });
-        
+
     } else {
         $location.path('/');
     }
