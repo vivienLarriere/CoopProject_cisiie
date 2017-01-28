@@ -138,9 +138,15 @@ app.controller("SignupController", ['$scope', 'TokenService', 'Member', '$locati
 
 app.controller("DisplayMembersController", ['$scope', 'TokenService', 'Member', '$location', function($scope, TokenService, Member, $location) {
     if (TokenService.getToken() !== null) {
-        $scope.members = Member.query(
+        var members = Member.query(
             function(m) {
-                $scope.members = m;
+                var tmp_scope = [];
+                angular.forEach(m, function(value) {
+                    if (value.token !== TokenService.getToken())
+                        tmp_scope.push(value);
+                    console.log(tmp_scope);
+                });
+                $scope.members = tmp_scope;
             },
             function(error) {
                 console.log(error);
@@ -148,12 +154,14 @@ app.controller("DisplayMembersController", ['$scope', 'TokenService', 'Member', 
 
         $scope.deleteMember = function(m) {
             m.$delete(
-                function() {
-                    console.log($scope.members);
-                },
+                function() {},
                 function(error) {
                     console.log(error);
                 });
+            angular.forEach($scope.members, function(value, key) {
+                if (value === m)
+                    $scope.members.splice(key, 1);
+            });
         }
     } else
         $location.path('/signin')
