@@ -18,3 +18,9 @@ body>.grid {
 .column {
     width: 70%;
 }
+
+.ui.segment.chat {
+    width: auto;
+    margin-left: 5em;
+    margin-right: 5em;
+}

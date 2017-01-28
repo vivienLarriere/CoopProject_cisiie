@@ -199,6 +199,24 @@ app.controller("NewChanController", ['$scope', 'TokenService', 'Member', '$locat
                 alert(e.data.error);
             })
         }
+    } else {
+        $location.path('/');
+    }
+}]);
+
+app.controller('DisplayChanController', ['api', '$scope', 'TokenService', 'Member', 'Channel', '$routeParams', '$resource', function(api, $scope, TokenService, Member, Channel, $routeParams, $resource) {
+    if (TokenService.getToken() !== null) {
+        var Channel = $resource(api.url + '/channels/:id', {
+            id: '@id'
+        });
+        Channel.get({
+            id: $routeParams.id
+        }).$promise.then(function(c) {
+            $scope.channel = c;
+        });
+        
+    } else {
+        $location.path('/');
     }
 }]);
 
