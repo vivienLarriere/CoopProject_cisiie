@@ -193,12 +193,13 @@ app.controller("ChanController", ['$scope', 'TokenService', 'Member', '$location
                 console.log(e);
             });
     } else
-        $location.path('/signin')
+        $location.path('/')
 }]);
 
 
 app.controller("NewChanController", ['$scope', 'TokenService', 'Member', '$location', 'Channel', function($scope, TokenService, Member, $location, Channel) {
     if (TokenService.getToken() !== null) {
+      console.log('toto');
         $scope.addChan = function() {
             $scope.class += " loading form";
 
@@ -246,12 +247,12 @@ app.controller('DisplayPostController', ['$scope', 'TokenService', '$routeParams
                 console.log(e);
             });
 
-        Member.get({
-            id: TokenService.getToken()
-        }).$promise.then(function(m) {
-            $scope.member = m;
-            console.log(m);
-        });
+        // Member.get({
+        //     id: TokenService.getToken()
+        // }).$promise.then(function(m) {
+        //     $scope.member = m;
+        //     console.log(m);
+        // });
 
         $scope.addPost = function() {
             $scope.class += " disabled field"
@@ -274,20 +275,3 @@ app.controller('DisplayPostController', ['$scope', 'TokenService', '$routeParams
     } else
         $location.path('/');
 }]);
-
-
-
-/*$scope.member =	Member.save({
-		fullname: "TOTO",
-		email: "toto4@coop.fr",
-		password: "toto"
-	}, function(m){
-		$scope.member.$delete(function(success){
-			console.log(success);
-		});
-	}, function(e){
-		console.log($scope.newMember);
-	});
-
-
-	);*/

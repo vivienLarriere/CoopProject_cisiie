@@ -30,15 +30,16 @@ app.config(['$routeProvider', function($routeProvider) {
             controller: 'ChanController'
         })
 
+        .when('/chan/new', {
+            templateUrl: './views/new_chan.html',
+            controller: 'NewChanController'
+        })
+
         .when('/chan/:id', {
             templateUrl: './views/chan_detail.html',
             controller: 'DisplayChanController'
         })
 
-        .when('/chan/new', {
-            templateUrl: './views/new_chan.html',
-            controller: 'NewChanController'
-        })
 
         .when('/home', {
             templateUrl: './views/home.html',
