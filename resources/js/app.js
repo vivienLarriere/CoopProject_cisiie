@@ -193,12 +193,13 @@ app.controller("ChanController", ['$scope', 'TokenService', 'Member', '$location
                 console.log(e);
             });
     } else
-        $location.path('/signin')
+        $location.path('/')
 }]);
 
 
 app.controller("NewChanController", ['$scope', 'TokenService', 'Member', '$location', 'Channel', function($scope, TokenService, Member, $location, Channel) {
     if (TokenService.getToken() !== null) {
+        console.log('toto');
         $scope.addChan = function() {
             $scope.class += " loading form";
 
@@ -225,7 +226,7 @@ app.controller('DisplayChanController', ['$scope', 'TokenService', 'Channel', '$
             id: $routeParams.id
         }).$promise.then(function(c) {
             $scope.channel = c;
-            console.log(c);
+            // console.log(c);
         });
 
     } else {
@@ -235,22 +236,29 @@ app.controller('DisplayChanController', ['$scope', 'TokenService', 'Channel', '$
 
 app.controller('DisplayPostController', ['$scope', 'TokenService', '$routeParams', '$location', 'Post', 'Member', function($scope, TokenService, $routeParams, $location, Post, Member) {
     if (TokenService.getToken() !== null) {
+        var members = [];
+        Member.query().$promise.then(function(results_member) {
+            angular.forEach(results_member, function(value) {
+                members.push(value);
+            });
+        });
+
         $scope.posts = Post.query({
                 channel_id: $routeParams.id
             },
             function(p) {
                 $scope.posts = p;
-                console.log(p);
             },
             function(e) {
                 console.log(e);
+            }).$promise.then(function(results_post) {
+            angular.forEach(results_post, function(value) {
+                members.forEach(function(element) {
+                    if (element._id === value.member_id) {
+                        value.member_fullname = element.fullname;
+                    }
+                });
             });
-
-        Member.get({
-            id: TokenService.getToken()
-        }).$promise.then(function(m) {
-            $scope.member = m;
-            console.log(m);
         });
 
         $scope.addPost = function() {
@@ -265,29 +273,13 @@ app.controller('DisplayPostController', ['$scope', 'TokenService', '$routeParams
             }, function(p) {
                 $scope.posts.push(p);
                 $scope.postMessage = "";
+                $scope.class = "ui inverted input"
             }, function(e) {
                 console.log(e.data.error);
+                $scope.class = "ui inverted input"
             });
 
-            $scope.class = "ui inverted input"
         }
     } else
         $location.path('/');
 }]);
-
-
-
-/*$scope.member =	Member.save({
-		fullname: "TOTO",
-		email: "toto4@coop.fr",
-		password: "toto"
-	}, function(m){
-		$scope.member.$delete(function(success){
-			console.log(success);
-		});
-	}, function(e){
-		console.log($scope.newMember);
-	});
-
-
-	);*/
