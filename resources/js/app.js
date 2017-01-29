@@ -234,30 +234,12 @@ app.controller('DisplayChanController', ['$scope', 'TokenService', 'Channel', '$
     }
 }]);
 
-app.controller('DisplayPostController', ['$scope', 'TokenService', '$routeParams', '$location', 'Post', 'Member', function($scope, TokenService, $routeParams, $location, Post, Member) {
+app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', '$routeParams', '$location', 'Post', 'Member', function($scope, $interval, TokenService, $routeParams, $location, Post, Member) {
     if (TokenService.getToken() !== null) {
         var members = [];
         Member.query().$promise.then(function(results_member) {
             angular.forEach(results_member, function(value) {
                 members.push(value);
-            });
-        });
-
-        $scope.posts = Post.query({
-                channel_id: $routeParams.id
-            },
-            function(p) {
-                $scope.posts = p;
-            },
-            function(e) {
-                console.log(e);
-            }).$promise.then(function(results_post) {
-            angular.forEach(results_post, function(value) {
-                members.forEach(function(element) {
-                    if (element._id === value.member_id) {
-                        value.member_fullname = element.fullname;
-                    }
-                });
             });
         });
 
@@ -280,6 +262,27 @@ app.controller('DisplayPostController', ['$scope', 'TokenService', '$routeParams
             });
 
         }
+
+        $interval(function() {
+            $scope.posts = Post.query({
+                    channel_id: $routeParams.id
+                },
+                function(p) {
+                    $scope.posts = p;
+                },
+                function(e) {
+                    console.log(e);
+                }).$promise.then(function(results_post) {
+                angular.forEach(results_post, function(value) {
+                    members.forEach(function(element) {
+                        if (element._id === value.member_id) {
+                            value.member_fullname = element.fullname;
+                        }
+                    });
+                });
+            });
+
+        }, 1000);
     } else
         $location.path('/');
 }]);
