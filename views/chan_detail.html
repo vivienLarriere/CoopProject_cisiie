@@ -10,7 +10,7 @@
                         <i class="ui user icon"></i>
                     </a>
                     <div class="content">
-                        <a class="author">{{member.fullname}}</a>
+                        <a class="author">{{post.member_fullname}}</a>
                         <div class="metadata">
                             <div class="date">{{ post.created_at | date : 'dd/MM/yyyy hh:mm'}}</div>
                         </div>
@@ -22,7 +22,7 @@
         </div>
     </div>
     <form ng-submit='addPost()'>
-        <div class="ui inverted input fluid" ng-class='class'>
+        <div class="ui inverted input fluid" ng-class="class">
             <i class="big send icon"></i>
             <input type="text" ng-model='postMessage' placeholder="Entrez votre message ici...">
         </div>
