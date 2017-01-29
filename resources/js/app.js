@@ -24,10 +24,20 @@ app.service('TokenService', [function() {
     }
 }]);
 
-
-app.service('UrlService', ['$location', function($location) {
-    this.myurl = $location.absURL();
-}]);
+app.directive('toTheBottom', function() {
+    return {
+        scope: {
+            toTheBottom: "="
+        },
+        link: function(scope, element) {
+            scope.$watchCollection('toTheBottom', function(newPost) {
+                if (newPost) {
+                    $(element).scrollTop($(element)[0].scrollHeight);
+                }
+            });
+        }
+    }
+})
 
 app.config(['$httpProvider', 'api', function($httpProvider, api) {
     $httpProvider.defaults.headers.common.Authorization = 'Token token=' + api.key;
@@ -66,6 +76,13 @@ app.factory("Member", ['$resource', 'api', function($resource, api) {
 
 app.factory("Channel", ['$resource', 'api', function($resource, api) {
     return $resource(api.url + '/channels/:id', {
+        id: '@_id'
+    }, {});
+}]);
+
+app.factory("Post", ['$resource', 'api', function($resource, api) {
+    return $resource(api.url + '/channels/:channel_id/posts/:id', {
+        channel_id: '@channel_id',
         id: '@_id'
     }, {});
 }]);
@@ -202,17 +219,60 @@ app.controller("NewChanController", ['$scope', 'TokenService', 'Member', '$locat
     }
 }]);
 
-app.controller('DisplayChanController', ['api', '$scope', 'TokenService', 'Member', 'Channel', '$routeParams', '$resource', function(api, $scope, TokenService, Member, Channel, $routeParams, $resource) {
+app.controller('DisplayChanController', ['$scope', 'TokenService', 'Channel', '$routeParams', '$location', function($scope, TokenService, Channel, $routeParams, $location) {
     if (TokenService.getToken() !== null) {
         Channel.get({
             id: $routeParams.id
         }).$promise.then(function(c) {
             $scope.channel = c;
+            console.log(c);
         });
 
     } else {
         $location.path('/');
     }
+}]);
+
+app.controller('DisplayPostController', ['$scope', 'TokenService', '$routeParams', '$location', 'Post', 'Member', function($scope, TokenService, $routeParams, $location, Post, Member) {
+    if (TokenService.getToken() !== null) {
+        $scope.posts = Post.query({
+                channel_id: $routeParams.id
+            },
+            function(p) {
+                $scope.posts = p;
+                console.log(p);
+            },
+            function(e) {
+                console.log(e);
+            });
+
+        Member.get({
+            id: TokenService.getToken()
+        }).$promise.then(function(m) {
+            $scope.member = m;
+            console.log(m);
+        });
+
+        $scope.addPost = function() {
+            $scope.class += " disabled field"
+
+            $scope.newPost = new Post({
+                message: $scope.postMessage
+            });
+
+            $scope.newPost.$save({
+                channel_id: $routeParams.id
+            }, function(p) {
+                $scope.posts.push(p);
+                $scope.postMessage = "";
+            }, function(e) {
+                console.log(e.data.error);
+            });
+
+            $scope.class = "ui inverted input"
+        }
+    } else
+        $location.path('/');
 }]);
 
 

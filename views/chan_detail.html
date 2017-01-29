@@ -1,11 +1,30 @@
 <div ng-include="'./views/navbar.html'"></div>
 <h1>{{channel.label}}</h1>
 <div class="ui sub header">{{channel.topic}}</div>
-<div class="ui raised segment chat">
-
-</div>
-<div class="ui segment">
-    <div class="ui inverted input">
-        <input type="text" placeholder="Entrez votre message ici...">
+<div ng-controller="DisplayPostController">
+    <div class="ui raised segment chat" to-the-bottom="posts">
+        <div ng-repeat='post in posts track by post._id'>
+            <div class="ui comments">
+                <div class="comment">
+                    <a class="avatar">
+                        <i class="ui user icon"></i>
+                    </a>
+                    <div class="content">
+                        <a class="author">{{member.fullname}}</a>
+                        <div class="metadata">
+                            <div class="date">{{ post.created_at | date : 'dd/MM/yyyy hh:mm'}}</div>
+                        </div>
+                        <div class="text">{{post.message}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui clearing divider"></div>
+        </div>
     </div>
+    <form ng-submit='addPost()'>
+        <div class="ui inverted input fluid" ng-class='class'>
+            <i class="big send icon"></i>
+            <input type="text" ng-model='postMessage' placeholder="Entrez votre message ici...">
+        </div>
+    </form>
 </div>

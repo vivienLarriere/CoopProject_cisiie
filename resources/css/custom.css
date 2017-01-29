@@ -21,6 +21,8 @@ body>.grid {
 
 .ui.segment.chat {
     width: auto;
+    max-height: 25em;
+    overflow-y: auto;
     margin-left: 5em;
     margin-right: 5em;
 }
