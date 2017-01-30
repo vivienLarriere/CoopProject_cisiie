@@ -263,12 +263,31 @@ app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', 
 
         }
 
+        $scope.posts = Post.query({
+                channel_id: $routeParams.id
+            },
+            function(p) {
+                $scope.posts = p;
+            },
+            function(e) {
+                console.log(e);
+            }).$promise.then(function(results_post) {
+            angular.forEach(results_post, function(value) {
+                members.forEach(function(element) {
+                    if (element._id === value.member_id) {
+                        value.member_fullname = element.fullname;
+                    }
+                });
+            });
+        });
+
         $interval(function() {
-            $scope.posts = Post.query({
+            var toto = [];
+            toto = Post.query({
                     channel_id: $routeParams.id
                 },
                 function(p) {
-                    $scope.posts = p;
+                    toto = p;
                 },
                 function(e) {
                     console.log(e);
@@ -280,9 +299,14 @@ app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', 
                         }
                     });
                 });
+                console.log(toto);
+                console.log($scope.posts);
+                if (toto !== $scope.posts) {
+                    $scope.posts = toto;
+                }
             });
+        }, 3000);
 
-        }, 1000);
     } else
         $location.path('/');
 }]);
