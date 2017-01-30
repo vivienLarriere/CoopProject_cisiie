@@ -3,9 +3,13 @@ app.constant('api', {
     'key': '8f9d446fa032445083d15cd71e978aa4',
     'url': 'http://coop.api.netlor.fr/api'
 });
+app.run(['TokenService', function(TokenService) {
+    TokenService.tokenTimeout();
+}]);
 
-app.service('TokenService', [function() {
+app.service('TokenService', ['$timeout', function($timeout) {
     this.token = '';
+    this.token_timeout = '';
     this.setToken = function(t) {
         if (localStorage.getItem('token') === null) {
             localStorage.setItem('token', t);
@@ -21,6 +25,16 @@ app.service('TokenService', [function() {
     this.deleteToken = function() {
         if (localStorage.getItem('token') !== null)
             localStorage.removeItem('token');
+    }
+
+    this.tokenTimeout = function() {
+        $timeout.cancel(this.token_timeout);
+        this.token_timeout = $timeout(function() {
+            if (localStorage.getItem('token') !== null) {
+                localStorage.removeItem('token');
+                console.log('TOKEN DELETED !!!!!!!!');
+            }
+        }, 1800000);
     }
 }]);
 
@@ -39,7 +53,7 @@ app.directive('toTheBottom', function() {
     }
 })
 
-app.config(['$httpProvider', 'api', function($httpProvider, api) {
+app.config(['$httpProvider', 'api', '$timeoutProvider', function($httpProvider, api, $timeoutProvider) {
     $httpProvider.defaults.headers.common.Authorization = 'Token token=' + api.key;
 
     $httpProvider.interceptors.push(['TokenService', function(TokenService) {
@@ -47,13 +61,14 @@ app.config(['$httpProvider', 'api', function($httpProvider, api) {
             request: function(config) {
                 var token = TokenService.getToken();
                 if (token !== null) {
-                    config.url += ((config.url.indexOf('?') >= 0) ? '&' : '?') +
-                        'token=' + token;
+                    TokenService.tokenTimeout();
+                    config.url += ((config.url.indexOf('?') >= 0) ? '&' : '?') + 'token=' + token;
                 }
                 return config;
             }
-        };
+        }
     }]);
+
 }]);
 
 app.factory("Member", ['$resource', 'api', function($resource, api) {
@@ -91,7 +106,7 @@ app.controller("StartController", ['$scope', 'Member', 'TokenService', '$locatio
     if (TokenService.getToken() === null) {
         $location.path('/signin');
     } else {
-        $location.path('/home');
+        $location.path('/');
     }
 }]);
 
@@ -193,20 +208,19 @@ app.controller("ChanController", ['$scope', 'TokenService', 'Member', '$location
                 console.log(e);
             });
 
-            $scope.deleteChan = function(c) {
-                c.$delete(
-                    function() {},
-                    function(error) {
-                        console.log(error);
-                    });
-                angular.forEach($scope.channels, function(value, key) {
-                    if (value === c)
-                    {
-                        console.log(c);
-                        $scope.channels.splice(key, 1);
-                    }
+        $scope.deleteChan = function(c) {
+            c.$delete(
+                function() {},
+                function(error) {
+                    console.log(error);
                 });
-            }
+            angular.forEach($scope.channels, function(value, key) {
+                if (value === c) {
+                    console.log(c);
+                    $scope.channels.splice(key, 1);
+                }
+            });
+        }
     } else
         $location.path('/')
 }]);
@@ -249,7 +263,7 @@ app.controller('DisplayChanController', ['$scope', 'TokenService', 'Channel', '$
     }
 }]);
 
-app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', '$routeParams', '$location', 'Post', 'Member', function($scope, $interval, TokenService, $routeParams, $location, Post, Member) {
+app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', '$routeParams', '$location', 'Post', 'Member', '$rootScope', function($scope, $interval, TokenService, $routeParams, $location, Post, Member, $rootScope) {
     if (TokenService.getToken() !== null) {
         var members = [];
         Member.query().$promise.then(function(results_member) {
@@ -296,7 +310,7 @@ app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', 
             });
         });
 
-        $interval(function() {
+        var interval_posts = $interval(function() {
             var toto = [];
             toto = Post.query({
                     channel_id: $routeParams.id
@@ -314,13 +328,16 @@ app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', 
                         }
                     });
                 });
-                console.log(toto);
-                console.log($scope.posts);
                 if (toto !== $scope.posts) {
                     $scope.posts = toto;
                 }
+
             });
         }, 3000);
+
+        $rootScope.$on("$routeChangeStart", function() {
+            $interval.cancel(interval_posts);
+        });
 
     } else
         $location.path('/');
