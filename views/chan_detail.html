@@ -1,6 +1,7 @@
 <div ng-include="'./views/navbar.html'"></div>
 <h1>{{channel.label}}</h1>
 <div class="ui sub header">{{channel.topic}}</div>
+
 <div ng-controller="DisplayPostController">
     <div class="ui raised segment chat" to-the-bottom="posts">
         <div ng-repeat='post in posts track by post._id'>
