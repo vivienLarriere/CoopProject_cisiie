@@ -192,6 +192,21 @@ app.controller("ChanController", ['$scope', 'TokenService', 'Member', '$location
             function(e) {
                 console.log(e);
             });
+
+            $scope.deleteChan = function(c) {
+                c.$delete(
+                    function() {},
+                    function(error) {
+                        console.log(error);
+                    });
+                angular.forEach($scope.channels, function(value, key) {
+                    if (value === c)
+                    {
+                        console.log(c);
+                        $scope.channels.splice(key, 1);
+                    }
+                });
+            }
     } else
         $location.path('/')
 }]);
