@@ -3,8 +3,14 @@ app.constant('api', {
     'key': '8f9d446fa032445083d15cd71e978aa4',
     'url': 'http://coop.api.netlor.fr/api'
 });
-app.run(['TokenService', function(TokenService) {
-    TokenService.tokenTimeout();
+app.run(['TokenService', '$timeout', function(TokenService, $timeout) {
+    var date = new Date().getTime();
+
+    if (date - localStorage.getItem('date_token') >= 1800000)
+        TokenService.deleteToken();
+    else
+        TokenService.tokenTimeout();
+
 }]);
 
 app.service('TokenService', ['$timeout', function($timeout) {
@@ -13,9 +19,15 @@ app.service('TokenService', ['$timeout', function($timeout) {
     this.setToken = function(t) {
         if (localStorage.getItem('token') === null) {
             localStorage.setItem('token', t);
+            localStorage.setItem('date_token', new Date().getTime())
         } else {
             this.token = localStorage.getItem('token');
+            localStorage.setItem('date_token', new Date().getTime())
         }
+    }
+
+    this.refreshTokenDate = function() {
+        localStorage.setItem('date_token', new Date().getTime());
     }
 
     this.getToken = function() {
@@ -23,8 +35,10 @@ app.service('TokenService', ['$timeout', function($timeout) {
     }
 
     this.deleteToken = function() {
-        if (localStorage.getItem('token') !== null)
+        if (localStorage.getItem('token') !== null) {
             localStorage.removeItem('token');
+            localStorage.removeItem('date_token');
+        }
     }
 
     this.tokenTimeout = function() {
@@ -32,9 +46,10 @@ app.service('TokenService', ['$timeout', function($timeout) {
         this.token_timeout = $timeout(function() {
             if (localStorage.getItem('token') !== null) {
                 localStorage.removeItem('token');
+                localStorage.removeItem('date_token');
                 console.log('TOKEN DELETED !!!!!!!!');
             }
-        }, 1800000);
+        }, 1800000); //30 minutes
     }
 }]);
 
@@ -53,15 +68,15 @@ app.directive('toTheBottom', function() {
     }
 })
 
-app.config(['$httpProvider', 'api', '$timeoutProvider', function($httpProvider, api, $timeoutProvider) {
+app.config(['$httpProvider', 'api', '$timeoutProvider', '$locationProvider', function($httpProvider, api, $timeoutProvider, $locationProvider) {
     $httpProvider.defaults.headers.common.Authorization = 'Token token=' + api.key;
-
     $httpProvider.interceptors.push(['TokenService', function(TokenService) {
         return {
             request: function(config) {
                 var token = TokenService.getToken();
                 if (token !== null) {
                     TokenService.tokenTimeout();
+                    TokenService.refreshTokenDate();
                     config.url += ((config.url.indexOf('?') >= 0) ? '&' : '?') + 'token=' + token;
                 }
                 return config;
@@ -99,14 +114,18 @@ app.factory("Post", ['$resource', 'api', function($resource, api) {
     return $resource(api.url + '/channels/:channel_id/posts/:id', {
         channel_id: '@channel_id',
         id: '@_id'
-    }, {});
+    }, {
+        update: {
+            method: 'PUT'
+        }
+    });
 }]);
 
 app.controller("StartController", ['$scope', 'Member', 'TokenService', '$location', function($scope, Member, TokenService, $location) {
     if (TokenService.getToken() === null) {
         $location.path('/signin');
     } else {
-        $location.path('/');
+        $location.path('/home');
     }
 }]);
 
@@ -265,12 +284,37 @@ app.controller('DisplayChanController', ['$scope', 'TokenService', 'Channel', '$
 
 app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', '$routeParams', '$location', 'Post', 'Member', '$rootScope', function($scope, $interval, TokenService, $routeParams, $location, Post, Member, $rootScope) {
     if (TokenService.getToken() !== null) {
+
         var members = [];
         Member.query().$promise.then(function(results_member) {
             angular.forEach(results_member, function(value) {
                 members.push(value);
+
             });
         });
+
+        $scope.deletePost = function(p) {
+            p.$delete({
+                channel_id: $routeParams.id
+            }, function() {
+                console.log('toto');
+            }, function(e) {
+                console.log(e);
+            })
+        }
+
+        $scope.updatePost = function(p) {
+            if (p.editPost === true) {
+                p.$update({
+                    channel_id: $routeParams.id
+                }, function() {
+                    console.log('toto');
+
+                })
+            } else {
+                p.editPost = true;
+            }
+        }
 
         $scope.addPost = function() {
             $scope.class += " disabled field"
@@ -322,11 +366,13 @@ app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', 
                     console.log(e);
                 }).$promise.then(function(results_post) {
                 angular.forEach(results_post, function(value) {
-                    members.forEach(function(element) {
-                        if (element._id === value.member_id) {
-                            value.member_fullname = element.fullname;
-                        }
-                    });
+                    if (value.editPost !== true) {
+                        members.forEach(function(element) {
+                            if (element._id === value.member_id) {
+                                value.member_fullname = element.fullname;
+                            }
+                        });
+                    }
                 });
                 if (toto !== $scope.posts) {
                     $scope.posts = toto;
