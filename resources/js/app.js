@@ -107,7 +107,12 @@ app.factory("Member", ['$resource', 'api', function($resource, api) {
 app.factory("Channel", ['$resource', 'api', function($resource, api) {
     return $resource(api.url + '/channels/:id', {
         id: '@_id'
-    }, {});
+    }, {
+        update: {
+            method: 'PUT'
+        }
+
+    });
 }]);
 
 app.factory("Post", ['$resource', 'api', function($resource, api) {
@@ -277,114 +282,153 @@ app.controller('DisplayChanController', ['$scope', 'TokenService', 'Channel', '$
             // console.log(c);
         });
 
+        $scope.updateChannel = function(c) {
+            if (c.editChan == true) {
+                $scope.edit = {}
+                console.log($scope.edit.label);
+                console.log($scope.edit.topic);
+                c.$update({},
+                    function(c) {}
+                );
+            }
+        }
+
     } else {
         $location.path('/');
     }
 }]);
 
-app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', '$routeParams', '$location', 'Post', 'Member', '$rootScope', function($scope, $interval, TokenService, $routeParams, $location, Post, Member, $rootScope) {
-    if (TokenService.getToken() !== null) {
+app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', '$routeParams', '$location', 'Post', 'Member', '$rootScope',
+    function($scope, $interval, TokenService, $routeParams, $location, Post, Member, $rootScope) {
+        if (TokenService.getToken() !== null) {
 
-        var members = [];
-        Member.query().$promise.then(function(results_member) {
-            angular.forEach(results_member, function(value) {
-                members.push(value);
-
+            var members = [];
+            Member.query().$promise.then(function(results_member) {
+                angular.forEach(results_member, function(value) {
+                    members.push(value);
+                });
             });
-        });
 
-        $scope.deletePost = function(p) {
-            p.$delete({
-                channel_id: $routeParams.id
-            }, function() {
-                console.log('toto');
-            }, function(e) {
-                console.log(e);
-            })
-        }
-
-        $scope.updatePost = function(p) {
-            if (p.editPost === true) {
-                p.$update({
+            $scope.deletePost = function(p) {
+                p.$delete({
                     channel_id: $routeParams.id
                 }, function() {
                     console.log('toto');
-
+                }, function(e) {
+                    console.log(e);
                 })
-            } else {
-                p.editPost = true;
             }
-        }
 
-        $scope.addPost = function() {
-            $scope.class += " disabled field"
+            // $scope.updatePost = function(p) {
+            //     $interval.cancel(interval_posts);
+            //     if (p.editPost == true) {
+            //         p.$update({
+            //             channel_id: $routeParams.id
+            //         }, function(p) {
+            //             console.log($scope.postEditMessage);
+            //             console.log($scope.posts);
+            //             var interval_posts = $interval(function() {
+            //                 var toto = [];
+            //                 toto = Post.query({
+            //                         channel_id: $routeParams.id
+            //                     },
+            //                     function(p) {
+            //                         toto = p;
+            //                     },
+            //                     function(e) {
+            //                         console.log(e);
+            //                     }).$promise.then(function(results_post) {
+            //                     angular.forEach(results_post, function(value) {
+            //                         if (value.editPost !== true) {
+            //                             members.forEach(function(element) {
+            //                                 if (element._id === value.member_id) {
+            //                                     value.member_fullname = element.fullname;
+            //                                 }
+            //                             });
+            //                         }
+            //                     });
+            //                     if (toto !== $scope.posts) {
+            //                         $scope.posts = toto;
+            //                     }
+            //                 });
+            //             }, 3000);
+            //             p.editPost = false;
+            //         })
+            //     } else {
+            //         p.editPost = true;
+            //     }
+            // }
 
-            $scope.newPost = new Post({
-                message: $scope.postMessage
-            });
 
-            $scope.newPost.$save({
-                channel_id: $routeParams.id
-            }, function(p) {
-                $scope.posts.push(p);
-                $scope.postMessage = "";
-                $scope.class = "ui inverted input"
-            }, function(e) {
-                console.log(e.data.error);
-                $scope.class = "ui inverted input"
-            });
+            $scope.addPost = function() {
+                $scope.class += " disabled field"
 
-        }
-
-        $scope.posts = Post.query({
-                channel_id: $routeParams.id
-            },
-            function(p) {
-                $scope.posts = p;
-            },
-            function(e) {
-                console.log(e);
-            }).$promise.then(function(results_post) {
-            angular.forEach(results_post, function(value) {
-                members.forEach(function(element) {
-                    if (element._id === value.member_id) {
-                        value.member_fullname = element.fullname;
-                    }
+                $scope.newPost = new Post({
+                    message: $scope.postMessage
                 });
-            });
-        });
+                $scope.newPost.$save({
+                    channel_id: $routeParams.id
+                }, function(p) {
+                    $scope.posts.push(p);
+                    $scope.postMessage = "";
+                    $scope.class = "ui inverted input"
+                }, function(e) {
+                    console.log(e.data.error);
+                    $scope.class = "ui inverted input"
+                });
 
-        var interval_posts = $interval(function() {
-            var toto = [];
-            toto = Post.query({
+            }
+
+            $scope.posts = Post.query({
                     channel_id: $routeParams.id
                 },
                 function(p) {
-                    toto = p;
+                    $scope.posts = p;
                 },
                 function(e) {
                     console.log(e);
                 }).$promise.then(function(results_post) {
                 angular.forEach(results_post, function(value) {
-                    if (value.editPost !== true) {
-                        members.forEach(function(element) {
-                            if (element._id === value.member_id) {
-                                value.member_fullname = element.fullname;
-                            }
-                        });
-                    }
+                    members.forEach(function(element) {
+                        if (element._id === value.member_id) {
+                            value.member_fullname = element.fullname;
+                        }
+                    });
                 });
-                if (toto !== $scope.posts) {
-                    $scope.posts = toto;
-                }
-
             });
-        }, 3000);
 
-        $rootScope.$on("$routeChangeStart", function() {
-            $interval.cancel(interval_posts);
-        });
+            var interval_posts = $interval(function() {
+                var toto = [];
+                toto = Post.query({
+                        channel_id: $routeParams.id
+                    },
+                    function(p) {
+                        toto = p;
+                    },
+                    function(e) {
+                        console.log(e);
+                    }).$promise.then(function(results_post) {
+                    angular.forEach(results_post, function(value) {
+                        if (value.editPost !== true) {
+                            members.forEach(function(element) {
+                                if (element._id === value.member_id) {
+                                    value.member_fullname = element.fullname;
+                                }
+                            });
+                        }
+                    });
+                    if (toto !== $scope.posts) {
+                        $scope.posts = toto;
+                    }
 
-    } else
-        $location.path('/');
-}]);
+                });
+            }, 3000);
+
+            $rootScope.$on("$routeChangeStart", function() {
+                $interval.cancel(interval_posts);
+            });
+
+        } else
+            $location.path('/');
+    }
+]);

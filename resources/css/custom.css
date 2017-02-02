@@ -49,3 +49,14 @@ body>.grid {
     font-size: 1em;
     cursor: pointer;
 }
+
+i.icon.chanicon {
+    font-size: 1.2em;
+    color: #4183C4;
+    transition-duration: 0.5s;
+}
+
+i.icon.chanicon:hover {
+    font-size: 1.4em;
+    cursor: pointer;
+}
