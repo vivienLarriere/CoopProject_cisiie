@@ -40,9 +40,9 @@ app.config(['$routeProvider', function($routeProvider) {
             controller: 'DisplayChanController'
         })
 
-
         .when('/home', {
             templateUrl: './views/home.html',
+            controller: 'StartController'
         })
 
         .otherwise({

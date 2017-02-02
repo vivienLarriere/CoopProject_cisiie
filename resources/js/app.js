@@ -3,8 +3,14 @@ app.constant('api', {
     'key': '8f9d446fa032445083d15cd71e978aa4',
     'url': 'http://coop.api.netlor.fr/api'
 });
-app.run(['TokenService', function(TokenService) {
-    TokenService.tokenTimeout();
+app.run(['TokenService', '$timeout', function(TokenService, $timeout) {
+    var date = new Date().getTime();
+
+    if (date - localStorage.getItem('date_token') >= 1800000)
+        TokenService.deleteToken();
+    else
+        TokenService.tokenTimeout();
+
 }]);
 
 app.service('TokenService', ['$timeout', function($timeout) {
@@ -13,9 +19,15 @@ app.service('TokenService', ['$timeout', function($timeout) {
     this.setToken = function(t) {
         if (localStorage.getItem('token') === null) {
             localStorage.setItem('token', t);
+            localStorage.setItem('date_token', new Date().getTime())
         } else {
             this.token = localStorage.getItem('token');
+            localStorage.setItem('date_token', new Date().getTime())
         }
+    }
+
+    this.refreshTokenDate = function() {
+        localStorage.setItem('date_token', new Date().getTime());
     }
 
     this.getToken = function() {
@@ -23,8 +35,10 @@ app.service('TokenService', ['$timeout', function($timeout) {
     }
 
     this.deleteToken = function() {
-        if (localStorage.getItem('token') !== null)
+        if (localStorage.getItem('token') !== null) {
             localStorage.removeItem('token');
+            localStorage.removeItem('date_token');
+        }
     }
 
     this.tokenTimeout = function() {
@@ -32,9 +46,10 @@ app.service('TokenService', ['$timeout', function($timeout) {
         this.token_timeout = $timeout(function() {
             if (localStorage.getItem('token') !== null) {
                 localStorage.removeItem('token');
+                localStorage.removeItem('date_token');
                 console.log('TOKEN DELETED !!!!!!!!');
             }
-        }, 1800000);
+        }, 1800000); //30 minutes
     }
 }]);
 
@@ -53,15 +68,15 @@ app.directive('toTheBottom', function() {
     }
 })
 
-app.config(['$httpProvider', 'api', '$timeoutProvider', function($httpProvider, api, $timeoutProvider) {
+app.config(['$httpProvider', 'api', '$timeoutProvider', '$locationProvider', function($httpProvider, api, $timeoutProvider, $locationProvider) {
     $httpProvider.defaults.headers.common.Authorization = 'Token token=' + api.key;
-
     $httpProvider.interceptors.push(['TokenService', function(TokenService) {
         return {
             request: function(config) {
                 var token = TokenService.getToken();
                 if (token !== null) {
                     TokenService.tokenTimeout();
+                    TokenService.refreshTokenDate();
                     config.url += ((config.url.indexOf('?') >= 0) ? '&' : '?') + 'token=' + token;
                 }
                 return config;
@@ -92,21 +107,30 @@ app.factory("Member", ['$resource', 'api', function($resource, api) {
 app.factory("Channel", ['$resource', 'api', function($resource, api) {
     return $resource(api.url + '/channels/:id', {
         id: '@_id'
-    }, {});
+    }, {
+        update: {
+            method: 'PUT'
+        }
+
+    });
 }]);
 
 app.factory("Post", ['$resource', 'api', function($resource, api) {
     return $resource(api.url + '/channels/:channel_id/posts/:id', {
         channel_id: '@channel_id',
         id: '@_id'
-    }, {});
+    }, {
+        update: {
+            method: 'PUT'
+        }
+    });
 }]);
 
 app.controller("StartController", ['$scope', 'Member', 'TokenService', '$location', function($scope, Member, TokenService, $location) {
     if (TokenService.getToken() === null) {
         $location.path('/signin');
     } else {
-        $location.path('/');
+        $location.path('/home');
     }
 }]);
 
@@ -258,65 +282,108 @@ app.controller('DisplayChanController', ['$scope', 'TokenService', 'Channel', '$
             // console.log(c);
         });
 
+        $scope.updateChannel = function(c) {
+            if (c.editChan == true) {
+                $scope.edit = {}
+                console.log($scope.edit.label);
+                console.log($scope.edit.topic);
+                c.$update({},
+                    function(c) {}
+                );
+            }
+        }
+
     } else {
         $location.path('/');
     }
 }]);
 
-app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', '$routeParams', '$location', 'Post', 'Member', '$rootScope', function($scope, $interval, TokenService, $routeParams, $location, Post, Member, $rootScope) {
-    if (TokenService.getToken() !== null) {
-        var members = [];
-        Member.query().$promise.then(function(results_member) {
-            angular.forEach(results_member, function(value) {
-                members.push(value);
-            });
-        });
+app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', '$routeParams', '$location', 'Post', 'Member', '$rootScope',
+    function($scope, $interval, TokenService, $routeParams, $location, Post, Member, $rootScope) {
+        if (TokenService.getToken() !== null) {
 
-        $scope.addPost = function() {
-            $scope.class += " disabled field"
-
-            $scope.newPost = new Post({
-                message: $scope.postMessage
-            });
-
-            $scope.newPost.$save({
-                channel_id: $routeParams.id
-            }, function(p) {
-                $scope.posts.push(p);
-                $scope.postMessage = "";
-                $scope.class = "ui inverted input"
-            }, function(e) {
-                console.log(e.data.error);
-                $scope.class = "ui inverted input"
-            });
-
-        }
-
-        $scope.posts = Post.query({
-                channel_id: $routeParams.id
-            },
-            function(p) {
-                $scope.posts = p;
-            },
-            function(e) {
-                console.log(e);
-            }).$promise.then(function(results_post) {
-            angular.forEach(results_post, function(value) {
-                members.forEach(function(element) {
-                    if (element._id === value.member_id) {
-                        value.member_fullname = element.fullname;
-                    }
+            var members = [];
+            Member.query().$promise.then(function(results_member) {
+                angular.forEach(results_member, function(value) {
+                    members.push(value);
                 });
             });
-        });
 
-        var interval_posts = $interval(function() {
-            var toto = [];
-            toto = Post.query({
+            $scope.deletePost = function(p) {
+                p.$delete({
+                    channel_id: $routeParams.id
+                }, function() {
+                    console.log('toto');
+                }, function(e) {
+                    console.log(e);
+                })
+            }
+
+            // $scope.updatePost = function(p) {
+            //     $interval.cancel(interval_posts);
+            //     if (p.editPost == true) {
+            //         p.$update({
+            //             channel_id: $routeParams.id
+            //         }, function(p) {
+            //             console.log($scope.postEditMessage);
+            //             console.log($scope.posts);
+            //             var interval_posts = $interval(function() {
+            //                 var toto = [];
+            //                 toto = Post.query({
+            //                         channel_id: $routeParams.id
+            //                     },
+            //                     function(p) {
+            //                         toto = p;
+            //                     },
+            //                     function(e) {
+            //                         console.log(e);
+            //                     }).$promise.then(function(results_post) {
+            //                     angular.forEach(results_post, function(value) {
+            //                         if (value.editPost !== true) {
+            //                             members.forEach(function(element) {
+            //                                 if (element._id === value.member_id) {
+            //                                     value.member_fullname = element.fullname;
+            //                                 }
+            //                             });
+            //                         }
+            //                     });
+            //                     if (toto !== $scope.posts) {
+            //                         $scope.posts = toto;
+            //                     }
+            //                 });
+            //             }, 3000);
+            //             p.editPost = false;
+            //         })
+            //     } else {
+            //         p.editPost = true;
+            //     }
+            // }
+
+
+            $scope.addPost = function() {
+                $scope.class += " disabled field"
+
+                $scope.newPost = new Post({
+                    message: $scope.postMessage
+                });
+                $scope.newPost.$save({
+                    channel_id: $routeParams.id
+                }, function(p) {
+                    $scope.posts.push(p);
+                    $scope.postMessage = "";
+                    $scope.class = "ui inverted input"
+                }, function(e) {
+                    console.log(e.data.error);
+                    $scope.class = "ui inverted input"
+                });
+
+            }
+
+            $scope.posts = Post.query({
                     channel_id: $routeParams.id
                 },
                 function(p) {
-                    toto = p;
+                    $scope.posts = p;
                 },
                 function(e) {
                     console.log(e);
@@ -328,17 +395,40 @@ app.controller('DisplayPostController', ['$scope', '$interval', 'TokenService', 
                         }
                     });
                 });
-                if (toto !== $scope.posts) {
-                    $scope.posts = toto;
-                }
-
             });
-        }, 3000);
 
-        $rootScope.$on("$routeChangeStart", function() {
-            $interval.cancel(interval_posts);
-        });
+            var interval_posts = $interval(function() {
+                var toto = [];
+                toto = Post.query({
+                        channel_id: $routeParams.id
+                    },
+                    function(p) {
+                        toto = p;
+                    },
+                    function(e) {
+                        console.log(e);
+                    }).$promise.then(function(results_post) {
+                    angular.forEach(results_post, function(value) {
+                        if (value.editPost !== true) {
+                            members.forEach(function(element) {
+                                if (element._id === value.member_id) {
+                                    value.member_fullname = element.fullname;
+                                }
+                            });
+                        }
+                    });
+                    if (toto !== $scope.posts) {
+                        $scope.posts = toto;
+                    }
 
-    } else
-        $location.path('/');
-}]);
+                });
+            }, 3000);
+
+            $rootScope.$on("$routeChangeStart", function() {
+                $interval.cancel(interval_posts);
+            });
+
+        } else
+            $location.path('/');
+    }
+]);

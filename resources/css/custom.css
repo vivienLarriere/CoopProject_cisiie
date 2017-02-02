@@ -26,3 +26,37 @@ body>.grid {
     margin-left: 5em;
     margin-right: 5em;
 }
+
+.ui.icon.edit.posticon {
+    float: right;
+    font-size: 1.2em;
+    color: #4183C4;
+    transition-duration: 0.5s;
+}
+
+.ui.icon.edit.posticon:hover {
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.ui.icon.ban.posticon {
+    font-size: 0.8em;
+    color: red;
+    transition-duration: 0.5s;
+}
+
+.ui.icon.ban.posticon:hover {
+    font-size: 1em;
+    cursor: pointer;
+}
+
+i.icon.chanicon {
+    font-size: 1.2em;
+    color: #4183C4;
+    transition-duration: 0.5s;
+}
+
+i.icon.chanicon:hover {
+    font-size: 1.4em;
+    cursor: pointer;
+}
